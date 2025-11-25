@@ -158,13 +158,20 @@ const Header = () => {
                             )}
                         </div>
                     ) : (
-                        <button
-                            type="button"
-                            className="px-4 bg-gray-100 rounded-full hidden lg:inline-block"
-                            onClick={() => navigate('/auth?tab=register')}
-                        >
-                            <span className='text-gray-600 text-sm font-semibold'>Inscription / Connexion</span>
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => navigate('/auth?tab=login')}
+                                className="text-gray-600 hover:text-gray-800 font-medium text-sm"
+                            >
+                                Se connecter
+                            </button>
+                            <button
+                                onClick={() => navigate('/auth?tab=register')}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors"
+                            >
+                                S'inscrire
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

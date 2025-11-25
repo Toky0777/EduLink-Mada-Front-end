@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import ProfessorDetails from './pages/ProfessorDetails';
 import './styles/globals.css';
 import ProfessorSearch from './pages/ProfessorSearch';
+import Auth from './pages/Auth';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/professors/:id" element={<ProfessorDetails />} />
               <Route path="/search" element={<ProfessorSearch />} />
+              <Route path="/auth" element={<Auth />} />
             </Routes>
           </main>
           <Footer />
