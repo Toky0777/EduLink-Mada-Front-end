@@ -1,4 +1,3 @@
-// src/pages/Auth.jsx
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -12,7 +11,7 @@ const Auth = () => {
         name: '',
         email: '',
         password: '',
-        confirmPassword: '',
+        password_confirmation: '',
         role: 'student',
         agreeTerms: false
     });
@@ -37,20 +36,35 @@ const Auth = () => {
 
         try {
             if (activeTab === 'login') {
-                await login(formData.email, formData.password);
+                // Pour la connexion
+                await login({
+                    email: formData.email,
+                    password: formData.password
+                });
                 navigate('/');
             } else {
-                if (formData.password !== formData.confirmPassword) {
+                // Pour l'inscription - validation côté frontend
+                if (formData.password !== formData.password_confirmation) {
                     throw new Error('Les mots de passe ne correspondent pas');
                 }
                 if (!formData.agreeTerms) {
                     throw new Error('Veuillez accepter les conditions d\'utilisation');
                 }
-                await register(formData);
+
+                // Préparer les données pour l'API
+                const registerData = {
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                    password_confirmation: formData.password_confirmation,
+                    role: formData.role
+                };
+
+                await register(registerData);
                 navigate('/');
             }
         } catch (err) {
-            setError(err.response?.data?.message || err.message);
+            setError(err.response?.data?.message || err.message || 'Une erreur est survenue');
         } finally {
             setLoading(false);
         }
@@ -75,7 +89,10 @@ const Auth = () => {
                         ? 'Ou '
                         : 'Déjà membre ? '}
                     <button
-                        onClick={() => setActiveTab(activeTab === 'login' ? 'register' : 'login')}
+                        onClick={() => {
+                            setActiveTab(activeTab === 'login' ? 'register' : 'login');
+                            setError(''); // Clear error when switching tabs
+                        }}
                         className="font-medium text-[#ff4037] hover:text-[#e53935] transition-colors"
                     >
                         {activeTab === 'login' ? 'créez un nouveau compte' : 'connectez-vous'}
@@ -88,7 +105,10 @@ const Auth = () => {
                     {/* Tabs */}
                     <div className="flex space-x-4 mb-8 max-w-md mx-auto">
                         <button
-                            onClick={() => setActiveTab('login')}
+                            onClick={() => {
+                                setActiveTab('login');
+                                setError('');
+                            }}
                             className={`flex-1 py-3 px-4 text-center rounded-xl font-semibold transition-all duration-300 ${activeTab === 'login'
                                 ? 'bg-[#ff4037] text-white shadow-md'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -97,7 +117,10 @@ const Auth = () => {
                             Connexion
                         </button>
                         <button
-                            onClick={() => setActiveTab('register')}
+                            onClick={() => {
+                                setActiveTab('register');
+                                setError('');
+                            }}
                             className={`flex-1 py-3 px-4 text-center rounded-xl font-semibold transition-all duration-300 ${activeTab === 'register'
                                 ? 'bg-[#ff4037] text-white shadow-md'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -118,11 +141,11 @@ const Auth = () => {
                         <>
                             <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
                                 <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700 mb-2">
                                         Adresse email
                                     </label>
                                     <input
-                                        id="email"
+                                        id="loginEmail"
                                         name="email"
                                         type="email"
                                         required
@@ -134,11 +157,11 @@ const Auth = () => {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700 mb-2">
                                         Mot de passe
                                     </label>
                                     <input
-                                        id="password"
+                                        id="loginPassword"
                                         name="password"
                                         type="password"
                                         required
@@ -198,12 +221,10 @@ const Auth = () => {
                         </>
                     ) : (
                         <>
-                            {/* Formulaire d'inscription en deux colonnes */}
                             <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    {/* Colonne de gauche - Informations personnelles */}
-                                    <div className="space-y-6">
-                                        <div>
+                                    <div className="flex items-start gap-6">
+                                        <div className='w-full'>
                                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Nom complet *
                                             </label>
@@ -219,12 +240,12 @@ const Auth = () => {
                                             />
                                         </div>
 
-                                        <div>
-                                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                        <div className='w-full'>
+                                            <label htmlFor="registerEmail" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Adresse email *
                                             </label>
                                             <input
-                                                id="email"
+                                                id="registerEmail"
                                                 name="email"
                                                 type="email"
                                                 required
@@ -234,7 +255,9 @@ const Auth = () => {
                                                 placeholder="votre@email.com"
                                             />
                                         </div>
+                                    </div>
 
+                                    <div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-3">
                                                 Je suis : *
@@ -268,14 +291,13 @@ const Auth = () => {
                                         </div>
                                     </div>
 
-                                    {/* Colonne de droite - Sécurité */}
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <div className="flex items-start gap-6">
+                                        <div className='w-full'>
+                                            <label htmlFor="registerPassword" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Mot de passe *
                                             </label>
                                             <input
-                                                id="password"
+                                                id="registerPassword"
                                                 name="password"
                                                 type="password"
                                                 required
@@ -290,22 +312,24 @@ const Auth = () => {
                                             </p>
                                         </div>
 
-                                        <div>
-                                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                        <div className='w-full'>
+                                            <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Confirmer le mot de passe *
                                             </label>
                                             <input
-                                                id="confirmPassword"
-                                                name="confirmPassword"
+                                                id="password_confirmation"
+                                                name="password_confirmation"
                                                 type="password"
                                                 required
-                                                value={formData.confirmPassword}
+                                                value={formData.password_confirmation}
                                                 onChange={handleInputChange}
                                                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#ff4037] focus:border-transparent transition-all duration-200"
                                                 placeholder="Retapez votre mot de passe"
                                             />
                                         </div>
+                                    </div>
 
+                                    <div>
                                         {/* Terms Agreement */}
                                         <div className="flex items-start space-x-3 pt-4">
                                             <input
@@ -332,7 +356,6 @@ const Auth = () => {
                                     </div>
                                 </div>
 
-                                {/* Bouton de soumission centré */}
                                 <div className="mt-8 text-center">
                                     <button
                                         type="submit"
@@ -368,7 +391,7 @@ const Auth = () => {
                     </p>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

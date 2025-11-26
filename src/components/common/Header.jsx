@@ -124,17 +124,19 @@ const Header = () => {
                                         <p className="text-sm font-medium text-gray-800">{user.name}</p>
                                         <p className="text-xs text-gray-500 capitalize">{user.role}</p>
                                     </div>
-                                    <a
-                                        href="/profile"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            navigate('/profile');
-                                            setIsMenuOpen(false);
-                                        }}
-                                    >
-                                        Mon Profil
-                                    </a>
+                                    {user && user.role === 'professor' && (
+                                        <a
+                                            href="/profile"
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                navigate('/profile');
+                                                // setIsMenuOpen(false);
+                                            }}
+                                        >
+                                            Mon Profil
+                                        </a>
+                                    )}
                                     {user.role === 'student' && (
                                         <a
                                             href="/my-appointments"
@@ -145,7 +147,7 @@ const Header = () => {
                                                 setIsMenuOpen(false);
                                             }}
                                         >
-                                            Mes Cours
+                                            Mes Réservations
                                         </a>
                                     )}
                                     <button
